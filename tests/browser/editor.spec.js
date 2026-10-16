@@ -1,0 +1,36 @@
+import { test,expect } from '@playwright/test';
+test('complete writing flow, persistence, rewrite, settings and mobile layout',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await expect(page.getByRole('heading',{name:'Good words start here.'})).toBeVisible();
+ await page.getByRole('button',{name:'Try the writing studio'}).click();
+ const editor=page.getByRole('textbox',{name:'Writing editor'});
+ await expect(editor).toContainText('I is excited');
+ await expect(page.locator('.issue-spelling').first()).toBeVisible({timeout:15000});
+ await page.screenshot({path:'test-results/editor-desktop.png',fullPage:true});
+ await page.locator('.issue-spelling').first().click();
+ await page.getByRole('dialog',{name:'Selected correction'}).getByRole('button',{name:'Accept',exact:true}).click();
+ await expect(editor).toContainText('the first draft');
+ await expect(page.getByRole('button',{name:'Saved',exact:true})).toBeVisible();
+ await page.getByLabel('Document title').fill('Browser verified draft');
+ await expect(page.getByRole('button',{name:'Saved',exact:true})).toBeVisible();
+ await page.getByLabel('Writing mode',{exact:true}).selectOption('natural');
+ await expect(page.getByLabel('Writing mode',{exact:true})).toHaveValue('natural');
+ await editor.click();await page.keyboard.press('ControlOrMeta+a');
+ await page.getByRole('button',{name:'Rewrite selection',exact:true}).click();
+ const preview=page.getByRole('dialog',{name:'Rewrite preview'});await expect(preview).toBeVisible();
+ await preview.getByRole('button',{name:'Accept rewrite'}).click();
+ await expect(editor).toContainText('I am excited');
+ await page.getByRole('button',{name:'Back to documents'}).click();
+ await page.getByRole('button',{name:/Browser verified draft Pick up/}).click();
+ await expect(editor).toContainText('I am excited');
+ await page.reload();await page.getByRole('button',{name:/Browser verified draft Pick up/}).click();await expect(editor).toContainText('I am excited');
+ await page.setViewportSize({width:390,height:844});await page.screenshot({path:'test-results/editor-mobile.png',fullPage:true});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+ await page.getByLabel('Open navigation').click();await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByLabel('Dark mode').check();await expect(page.locator('html')).toHaveClass('dark');
+ await page.screenshot({path:'test-results/settings-mobile-dark.png',fullPage:true});
+ expect(errors).toEqual([]);
+});
+test('CSRF and host protection',async({request})=>{
+ expect((await request.post('/api/documents',{data:{title:'x',content:{type:'doc',content:[{type:'paragraph'}]}}})).status()).toBe(419);
+ expect((await request.get('/api/documents',{headers:{Host:'attacker.example'}})).status()).toBe(403);
+});

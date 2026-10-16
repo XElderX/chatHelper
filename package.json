@@ -1,0 +1,31 @@
+{
+  "name": "chathelper",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:integration": "node scripts/test-integration.mjs"
+  },
+  "dependencies": {
+    "@tiptap/core": "^3.0.0",
+    "@tiptap/pm": "^3.0.0",
+    "@tiptap/starter-kit": "^3.0.0",
+    "@tiptap/vue-3": "^3.0.0",
+    "lucide-vue-next": "^0.468.0",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.51.1",
+    "@tailwindcss/vite": "^4.0.0",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "concurrently": "^9.0.0",
+    "jsdom": "^26.0.0",
+    "laravel-vite-plugin": "^2.0.0",
+    "tailwindcss": "^4.0.0",
+    "vite": "^7.0.0",
+    "vitest": "^3.0.0"
+  }
+}
