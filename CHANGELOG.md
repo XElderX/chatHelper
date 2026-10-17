@@ -9,6 +9,18 @@ All notable changes to chatHelper are documented here. This project follows Sema
 - MySQL migration and integration verification.
 - Real-browser acceptance and visual review (blocked by environment socket restrictions).
 
+## [0.2.2] - 2026-10-17
+
+### Fixed
+- Subscription streaming now collects `response.output_text.delta` events before decoding, covering Responses streams whose final event contains no nested output items.
+- Structured output decoding handles top-level output text, UTF-8 BOMs, JSON fences and JSON-string wrappers.
+
+## [0.2.1] - 2026-10-17
+
+### Fixed
+- ChatGPT subscription mode automatically selects and saves the fastest available model when an account has no saved model.
+- Structured Responses output parsing now accepts the top-level output text and harmless JSON code fences/wrappers.
+
 ## [0.2.0] - 2026-10-17
 
 Local implementation update; no production-readiness claim or Git release tag. Live account acceptance remains unverified.

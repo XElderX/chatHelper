@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\ChatGptAccount;
 use App\Services\AI\AiException;
+use App\Services\AI\ChatGptProvider;
 use App\Services\AI\ResponseDecoder;
 use App\Services\Connections\ChatGptAuth;
 use App\Services\Connections\ConnectionManager;
@@ -186,6 +187,27 @@ class ChatGptTest extends TestCase
         Http::assertNotSent(fn ($r) => $r->hasHeader('Authorization', 'Bearer paid-secret'));
     }
 
+    public function test_missing_model_selects_fastest_available_model_automatically(): void
+    {
+        $a = $this->account(['model' => null]);
+        Http::fake([
+            'api.openai.com/v1/models' => Http::response(['models' => [
+                ['slug' => 'gpt-5-pro', 'display_name' => 'GPT-5 Pro', 'visibility' => 'list'],
+                ['slug' => 'gpt-5-mini', 'display_name' => 'GPT-5 mini', 'visibility' => 'list'],
+                ['slug' => 'gpt-5-nano', 'display_name' => 'GPT-5 nano', 'visibility' => 'list'],
+            ]]),
+        ]);
+
+        $this->getJson('/api/connections/chatgpt/models?account_id='.$a->id)
+            ->assertOk()
+            ->assertJsonCount(3, 'models');
+
+        $this->assertSame('gpt-5-nano', $a->fresh()->model);
+        $this->assertSame('gpt-5-nano', app(ChatGptProvider::class)->fastestModel([
+            ['id' => 'gpt-5-pro'], ['id' => 'gpt-5-mini'], ['id' => 'gpt-5-nano'],
+        ])['id']);
+    }
+
     public function test_late_usage_error_and_interrupted_stream_do_not_return_partial_text(): void
     {
         foreach (["data: {\"type\":\"response.output_text.delta\",\"delta\":\"partial\"}\n\n", "data: {\"type\":\"response.failed\",\"response\":{\"error\":{\"code\":\"subscription_sharing_usage_limit_exceeded\"}}}\n\n"] as $index => $stream) {
@@ -196,6 +218,14 @@ class ChatGptTest extends TestCase
                 $this->assertSame($index === 0 ? 502 : 429, $e->status);
             }
         }
+    }
+
+    public function test_stream_decoder_uses_output_text_deltas_when_completed_event_has_no_output_items(): void
+    {
+        $stream = "data: {\"type\":\"response.output_text.delta\",\"delta\":\"{\\\"suggestions\\\":[]}\"}\n\n"
+            ."data: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\",\"output\":[]}}\n\n";
+
+        $this->assertSame([], app(ResponseDecoder::class)->stream(Utils::streamFor($stream))['suggestions']);
     }
 
     public function test_signout_clears_credentials_preserves_mapping_and_does_not_fallback(): void

@@ -37,7 +37,7 @@ Use the same host and password in `.env`. The application must not use the MySQL
 ## 3. Project
 
 ```bash
-unzip chatHelper-0.2.0.zip
+unzip chatHelper-0.2.1.zip
 cd chatHelper
 composer install
 cp .env.example .env

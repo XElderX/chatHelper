@@ -2,7 +2,7 @@
 
 A calm writing workspace with live corrections, precise inline suggestions and previewed rewrites.
 
-**Version:** 0.2.0 (canonical: `VERSION`). **Status:** functional local single-user MVP; see [test evidence and release limitations](docs/TESTING.md).
+**Version:** 0.2.1 (canonical: `VERSION`). **Status:** functional local single-user MVP; see [test evidence and release limitations](docs/TESTING.md).
 
 ## Included
 
@@ -73,6 +73,6 @@ Live analysis supports up to 12,000 Unicode characters / 200 text blocks. Rewrit
 
 Documents are stored unencrypted in the configured local database. Encrypted analysis cache expires after five minutes by default. Live AI, manual rewrites and explanations send relevant text to OpenAI when selected. `store:false` is used; this is not a promise of zero provider retention. No document content is logged intentionally. Use a personal trusted OS account.
 
-In Settings, choose **Use API key** for separate API billing, or **Continue with ChatGPT** for eligible subscription usage. Sign-in uses the official local-app OAuth integration, not GitHub login or browser cookies. After authorization, load available models and select one. The app never falls back to API billing if subscription access is unavailable. Live provider quality, account eligibility and end-to-end live OAuth still need verification with your own account.
+In Settings, choose **Use API key** for separate API billing, or **Continue with ChatGPT** for eligible subscription usage. Sign-in uses the official local-app OAuth integration, not GitHub login or browser cookies. After authorization, load available models; if no model is selected, chatHelper automatically saves the fastest available model. You can change it manually in Settings. The app never falls back to API billing if subscription access is unavailable. Live provider quality, account eligibility and end-to-end live OAuth still need verification with your own account.
 
 Upgrading from v0.1? Follow [Upgrade to 0.2](docs/UPGRADE_0.2.md); preserve your database, `.env` and `APP_KEY`.

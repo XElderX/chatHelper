@@ -1,10 +1,10 @@
-# Test evidence — v0.2.0
+# Test evidence — v0.2.2
 
 Verified on 2026-10-17 using Ubuntu 24.04, PHP 8.3.6, Composer 2.10.3, Node 24.19.0 and installed lockfiles. The workspace-local PHP runtime is not included in the archive.
 
 | Check | Result |
 |---|---|
-| `php artisan test` | PASS: 36 tests, 149 assertions |
+| `php artisan test` | PASS: 38 tests, 154 assertions |
 | `npm test` | PASS: 19 tests (15 editor + 4 connection UI); optional HTTP workflow skipped in this command |
 | `npm run test:integration` | PASS: 1 complete Vue-to-Laravel HTTP workflow |
 | `npm run build` | PASS: 1,611 modules; JS ~494 KB / ~163 KB gzip; CSS ~59 KB / ~14 KB gzip |
@@ -15,7 +15,7 @@ Verified on 2026-10-17 using Ubuntu 24.04, PHP 8.3.6, Composer 2.10.3, Node 24.1
 | MySQL | Not executed; migration is written using Laravel schema APIs |
 | Real browser / visual acceptance | Not verified; Chromium was previously blocked by the runtime's Unix-socket restrictions |
 
-New tests cover PKCE and issued registration exchange, encrypted storage and metadata secrecy, nonce/issuer/audience/expiry/signature rejection, browser binding, replay prevention, HTTP callback/session continuity, reauthorization subject binding, rotating refresh credentials, catalog filtering, streaming request shape, interrupted and late-failure streams, missing plan scope, sign-out without billing fallback, explicit provider selection and cache isolation across accounts. UI tests cover explicit API selection, model loading/selection, sign-out messaging and failed sign-in. These fixtures validate implementation behavior, not OpenAI account eligibility or live API compatibility.
+The model-selection test verifies that a missing model chooses the fastest available catalog entry. The decoder tests also cover valid wrapped structured output. New tests cover PKCE and issued registration exchange, encrypted storage and metadata secrecy, nonce/issuer/audience/expiry/signature rejection, browser binding, replay prevention, HTTP callback/session continuity, reauthorization subject binding, rotating refresh credentials, catalog filtering, streaming request shape, interrupted and late-failure streams, missing plan scope, sign-out without billing fallback, explicit provider selection and cache isolation across accounts. UI tests cover explicit API selection, model loading/selection, sign-out messaging and failed sign-in. These fixtures validate implementation behavior, not OpenAI account eligibility or live API compatibility.
 
 ## What the integration check actually does
 

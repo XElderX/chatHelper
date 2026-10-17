@@ -2,7 +2,7 @@
 
 These are proposed milestones, not promises or committed dates.
 
-- **0.2.1:** address real-provider feedback, improve keyboard/focus accessibility, add conflict-recovery UX and broaden MySQL integration coverage.
+- **0.2.2:** address real-provider feedback, improve keyboard/focus accessibility, add conflict-recovery UX and broaden MySQL integration coverage.
 - **0.3 planning:** incremental paragraph analysis, stronger evaluation corpus, suggestions for longer documents, better selection behavior, offline draft recovery, authenticated multi-user foundation.
 - **0.3.x:** Chrome / Firefox extension using an authenticated API; careful per-site permission and privacy controls.
 - **0.4.x:** Android input integration with explicit user consent and secure account/session handling.

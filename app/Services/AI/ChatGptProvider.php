@@ -30,7 +30,43 @@ class ChatGptProvider implements AiProviderInterface
             }
         }
 
+        if (! $a->model && $result) {
+            $chosen = $this->fastestModel($result);
+            $this->auth->locked(function () use ($a, $chosen) {
+                $fresh = $a->fresh();
+                if ($fresh && $fresh->auth_epoch === $a->auth_epoch && $fresh->credentials && ! $fresh->model) {
+                    $fresh->update(['model' => $chosen['id']]);
+                }
+            });
+        }
+
         return $result;
+    }
+
+    /** Choose the lowest-latency model from the available catalog by documented name hints. */
+    public function fastestModel(array $models): ?array
+    {
+        if (! $models) {
+            return null;
+        }
+
+        $rank = function (array $model): int {
+            $id = strtolower($model['id'] ?? '');
+            $score = 50;
+            if (preg_match('/nano/', $id)) {
+                $score -= 40;
+            } elseif (preg_match('/mini|instant|flash|small/', $id)) {
+                $score -= 30;
+            }
+            if (preg_match('/pro|reasoning|\bo[1-9]/', $id)) {
+                $score += 30;
+            }
+
+            return $score;
+        };
+        usort($models, fn (array $left, array $right) => $rank($left) <=> $rank($right));
+
+        return $models[0];
     }
 
     private function checkStatus(int $status): void
@@ -53,7 +89,12 @@ class ChatGptProvider implements AiProviderInterface
     {
         $a = $this->auth->usableAccount();
         if (! $a->model) {
-            throw new AiException('Choose a ChatGPT model in Settings before analyzing text.', 422);
+            // Loading the catalog also persists the fastest available model for first use.
+            $this->models($a->id);
+            $a = $a->fresh();
+        }
+        if (! $a?->model) {
+            throw new AiException('No usable ChatGPT model is available for this account.', 422);
         }
         $body = ['model' => $a->model, 'store' => false, 'stream' => true, 'instructions' => $this->prompts->instructions($task, $mode),
             'input' => [['role' => 'user', 'content' => json_encode($input, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)]],
