@@ -11,21 +11,41 @@ class ResponseDecoder
         if (($response['status'] ?? '') !== 'completed') {
             throw new AiException('The AI response was incomplete. Try a shorter passage.');
         }
-        $text = '';
+        $text = is_string($response['output_text'] ?? null) ? $response['output_text'] : '';
         foreach ($response['output'] ?? [] as $item) {
             foreach ($item['content'] ?? [] as $part) {
                 if (($part['type'] ?? '') === 'refusal') {
                     throw new AiException('The AI provider declined this request.', 422);
                 }
-                if (($part['type'] ?? '') === 'output_text') {
-                    $text .= $part['text'] ?? '';
+                if (($part['type'] ?? '') === 'output_text' && is_string($part['text'] ?? null)) {
+                    $text .= $part['text'];
                 }
             }
+        }
+        $text = trim($text, " \t\r\n\xEF\xBB\xBF");
+        if (preg_match('/\A```(?:json)?\s*(.*?)\s*```\z/is', $text, $match)) {
+            $text = trim($match[1]);
         }
         try {
             $data = json_decode($text, true, 512, JSON_THROW_ON_ERROR);
         } catch (\Throwable) {
-            throw new AiException('The AI returned invalid structured data. Please retry.');
+            $start = strpos($text, '{');
+            $end = strrpos($text, '}');
+            if ($start === false || $end === false || $end <= $start) {
+                throw new AiException('The AI returned invalid structured data. Please retry.');
+            }
+            try {
+                $data = json_decode(substr($text, $start, $end - $start + 1), true, 512, JSON_THROW_ON_ERROR);
+            } catch (\Throwable) {
+                throw new AiException('The AI returned invalid structured data. Please retry.');
+            }
+        }
+        if (is_string($data)) {
+            try {
+                $data = json_decode($data, true, 512, JSON_THROW_ON_ERROR);
+            } catch (\Throwable) {
+                throw new AiException('The AI returned invalid structured data. Please retry.');
+            }
         }
         if (! is_array($data)) {
             throw new AiException('The AI returned an invalid response.');
@@ -40,6 +60,7 @@ class ResponseDecoder
         $buffer = '';
         $bytes = 0;
         $completed = null;
+        $streamText = '';
         try {
             while (! $stream->eof()) {
                 $chunk = $stream->read(8192);
@@ -70,6 +91,12 @@ class ResponseDecoder
                         throw new AiException('OpenAI returned an invalid stream event.');
                     }
                     $type = $event['type'] ?? '';
+                    if ($type === 'response.output_text.delta' && is_string($event['delta'] ?? null)) {
+                        $streamText .= $event['delta'];
+                    }
+                    if ($type === 'response.output_text.done' && is_string($event['text'] ?? null) && $streamText === '') {
+                        $streamText = $event['text'];
+                    }
                     if (in_array($type, ['response.failed', 'response.incomplete', 'error'])) {
                         $code = $event['response']['error']['code'] ?? $event['error']['code'] ?? $event['code'] ?? '';
                         if (in_array($code, ['subscription_sharing_usage_limit_exceeded', 'subscription_sharing_usage_unavailable'])) {
@@ -79,6 +106,9 @@ class ResponseDecoder
                     }
                     if ($type === 'response.completed') {
                         $completed = $event['response'] ?? null;
+                        if (is_array($completed) && $streamText !== '' && ! is_string($completed['output_text'] ?? null)) {
+                            $completed['output_text'] = $streamText;
+                        }
                         break 2;
                     }
                 }

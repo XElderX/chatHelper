@@ -40,7 +40,7 @@ PUT example:
 ```
 GET/PUT response example (timestamps omitted):
 ```json
-{"settings":{"id":1,"mode":"natural","live_analysis":false,"dark_mode":true},"version":"0.2.0","provider":"openai","configured":true,"debounce_ms":700}
+{"settings":{"id":1,"mode":"natural","live_analysis":false,"dark_mode":true},"version":"0.2.1","provider":"openai","configured":true,"debounce_ms":700}
 ```
 `configured` checks presence, not key validity. No secret is returned.
 
@@ -114,7 +114,7 @@ These routes use the same local-only/session/CSRF protections and an additional 
 | GET | `/connections` | provider, configured, api_key_configured, accounts, active_account_id |
 | PUT | `/connections` | `{provider: openai/chatgpt/mock, account_id?: integer}`; explicit selection |
 | POST | `/connections/chatgpt/start` | Optional account_id for reauthorization; returns `{url}` for full-page navigation to official OpenAI authorization |
-| GET | `/connections/chatgpt/models?account_id=1` | Returns `{models:[{id,label}]}` from the authorized account's catalog |
+| GET | `/connections/chatgpt/models?account_id=1` | Returns `{models:[{id,label}]}` from the authorized account's catalog and automatically saves a fastest-model choice when the account has none |
 | PUT | `/connections/chatgpt/model` | `{account_id,model}`; checks the current catalog and saves selection |
 | POST | `/connections/chatgpt/disconnect` | `{account_id}`; returns revocation_confirmed and a safe status message |
 

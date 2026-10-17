@@ -34,7 +34,7 @@ If you close the page with unsaved changes, the browser is asked to warn you; br
 Open **Settings** to change the default mode, live analysis and dark mode. Preferences persist in the database. The footer displays the version. The AI connection section offers two billing modes:
 
 1. **OpenAI API key:** set `OPENAI_API_KEY` and `OPENAI_MODEL` in the server `.env`, clear Laravel config and restart, then click **Use API key**. Usage is billed separately. The key stays on the server; a configured status is not a connectivity check.
-2. **Continue with ChatGPT:** open the app at `http://127.0.0.1:<port>`, click the button and authorize the official OpenAI sign-in screen. After returning, click **Load available models** and choose one. Your account must be eligible and authorize subscription usage. No API key is required.
+2. **Continue with ChatGPT:** open the app at `http://127.0.0.1:<port>`, click the button and authorize the official OpenAI sign-in screen. After returning, click **Load available models**. If no model is selected, chatHelper automatically saves the fastest available model; you can change it manually afterward. Your account must be eligible and authorize subscription usage. No API key is required.
 
 Connected accounts show separate registration labels, even when email addresses match. **Use this account** selects one; **Reconnect** renews the same registration. **Sign out** removes local tokens and attempts remote refresh-token revocation. If revocation cannot be confirmed, the UI says so and directs you to ChatGPT Settings. Other accounts and documents are retained.
 
