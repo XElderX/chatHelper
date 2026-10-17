@@ -2,7 +2,7 @@
 
 A calm writing workspace with live corrections, precise inline suggestions and previewed rewrites.
 
-**Version:** 0.1.0 (canonical: `VERSION`). **Status:** functional local single-user MVP; see [test evidence and release limitations](docs/TESTING.md).
+**Version:** 0.2.0 (canonical: `VERSION`). **Status:** functional local single-user MVP; see [test evidence and release limitations](docs/TESTING.md).
 
 ## Included
 
@@ -11,6 +11,8 @@ A calm writing workspace with live corrections, precise inline suggestions and p
 - Eight writing modes and eight selection rewrite actions with accept/reject previews.
 - Document creation, listing/search, rename, deletion, persistent autosave and optimistic locking.
 - Responsive dashboard, writing studio, settings and dark mode.
+- Two explicit AI connections: OpenAI API key (separately billed) or Continue with ChatGPT (eligible subscription usage through the official integration).
+- ChatGPT account selection, account-specific model catalog, encrypted credentials, refresh and sign-out.
 - Official OpenAI Responses API with server-side JSON schema and anchor validation.
 - Explicit mock provider for development; never silently substitutes for OpenAI.
 - Loopback-only access, CSRF checks, rate limits and encrypted short-lived analysis cache.
@@ -26,7 +28,7 @@ Unzip the project, then from the `chatHelper` directory:
 ```bash
 composer install
 cp .env.example .env
-# Edit .env: set MySQL credentials and OPENAI_API_KEY.
+# Edit .env: set MySQL credentials; API key is optional for ChatGPT sign-in.
 php artisan key:generate
 php artisan migrate
 npm ci
@@ -71,4 +73,6 @@ Live analysis supports up to 12,000 Unicode characters / 200 text blocks. Rewrit
 
 Documents are stored unencrypted in the configured local database. Encrypted analysis cache expires after five minutes by default. Live AI, manual rewrites and explanations send relevant text to OpenAI when selected. `store:false` is used; this is not a promise of zero provider retention. No document content is logged intentionally. Use a personal trusted OS account.
 
-ChatGPT account login is not implemented. ChatGPT Plus does not include API credits; use your own official API key and separate billing. Live provider quality and availability require testing with your own credentials.
+In Settings, choose **Use API key** for separate API billing, or **Continue with ChatGPT** for eligible subscription usage. Sign-in uses the official local-app OAuth integration, not GitHub login or browser cookies. After authorization, load available models and select one. The app never falls back to API billing if subscription access is unavailable. Live provider quality, account eligibility and end-to-end live OAuth still need verification with your own account.
+
+Upgrading from v0.1? Follow [Upgrade to 0.2](docs/UPGRADE_0.2.md); preserve your database, `.env` and `APP_KEY`.

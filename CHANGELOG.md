@@ -5,9 +5,33 @@ All notable changes to chatHelper are documented here. This project follows Sema
 ## [Unreleased]
 
 ### Pending verification
-- Real OpenAI credentials and end-user quality evaluation.
+- Live API-key calls, ChatGPT OAuth/account eligibility and end-user quality evaluation.
 - MySQL migration and integration verification.
 - Real-browser acceptance and visual review (blocked by environment socket restrictions).
+
+## [0.2.0] - 2026-10-17
+
+Local implementation update; no production-readiness claim or Git release tag. Live account acceptance remains unverified.
+
+### Added
+- Two explicit billing options: OpenAI API key and Continue with ChatGPT through the official local/OSS integration.
+- OAuth authorization code with PKCE, dynamic app registration, stable host identity, account selection and account-specific model catalog.
+- Encrypted local credentials, serialized refresh-token rotation, revocation attempts and clear local sign-out feedback.
+- Bounded subscription streaming with completed-response validation and late usage-limit handling.
+- Connection UI, migrations, upgrade guide and security/regression tests.
+
+### Changed
+- Provider choice persists in Settings; AI_PROVIDER is the initial/default selection.
+- Analysis caches separate provider/account/model/authorization sessions. Stale connection results are rejected.
+- API key remains server-only and optional for ChatGPT mode. Subscription failures never fall back to paid API usage.
+
+### Security
+- Validate state/session/nonce, JWT signature, issuer, audience, expiry and subject. Retain issued registration for reauthorization.
+- Tokens remain encrypted server-side; no browser-cookie/session extraction. Preserve local-only and CSRF guards.
+- Added firebase/php-jwt 7.x; lockfile installs 7.2.1. The older 6.x line was rejected by Composer's advisory gate.
+
+### Upgrade
+- Run composer install, config:clear, migrate, npm ci and npm run build. Preserve database, .env and APP_KEY; see docs/UPGRADE_0.2.md.
 
 ## [0.1.0] - 2026-10-16
 

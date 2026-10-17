@@ -1,18 +1,21 @@
-# Test evidence and release status
+# Test evidence — v0.2.0
 
-Verified on 2026-10-16 using Ubuntu 24.04, PHP 8.3.6, Composer 2.10.3, Node 24.19.0 and installed lockfiles. PHP was extracted into a workspace-local runtime because system installation was unavailable. This runtime is not included in the deliverable.
+Verified on 2026-10-17 using Ubuntu 24.04, PHP 8.3.6, Composer 2.10.3, Node 24.19.0 and installed lockfiles. The workspace-local PHP runtime is not included in the archive.
 
 | Check | Result |
 |---|---|
-| `php artisan test` | PASS: 23 tests, 84 assertions |
-| `npm test` | PASS: 15 editor tests; optional HTTP workflow skipped in this command |
-| `npm run test:integration` | PASS: 1 complete Vue-to-Laravel workflow test |
-| `npm run build` | PASS: 1,608 modules; JS ~489 KB / ~161 KB gzip, CSS ~58 KB / ~14 KB gzip |
-| Database migrations | PASS on SQLite, including fresh isolated integration database |
-| PHP syntax / Pint | Passed syntax inspection; PHP sources formatted with Pint |
-| OpenAI HTTP integration | Tested with Laravel fake HTTP and validated Responses payload; no billable live call |
-| MySQL | Not executed; migrations and default configuration target MySQL |
-| Browser acceptance / visual layouts | Not verified: Chromium failed to create a required Unix socket (`Operation not permitted`) in this environment |
+| `php artisan test` | PASS: 36 tests, 149 assertions |
+| `npm test` | PASS: 19 tests (15 editor + 4 connection UI); optional HTTP workflow skipped in this command |
+| `npm run test:integration` | PASS: 1 complete Vue-to-Laravel HTTP workflow |
+| `npm run build` | PASS: 1,611 modules; JS ~494 KB / ~163 KB gzip; CSS ~59 KB / ~14 KB gzip |
+| Database migrations | PASS: fresh temporary SQLite database and v0.1 local database upgrade |
+| PHP formatting | Pint applied |
+| OAuth and subscription provider | Fake HTTP with real RSA-signed JWT fixtures; no live account authorization |
+| API-key provider | Fake HTTP payload/error tests; no paid live call |
+| MySQL | Not executed; migration is written using Laravel schema APIs |
+| Real browser / visual acceptance | Not verified; Chromium was previously blocked by the runtime's Unix-socket restrictions |
+
+New tests cover PKCE and issued registration exchange, encrypted storage and metadata secrecy, nonce/issuer/audience/expiry/signature rejection, browser binding, replay prevention, HTTP callback/session continuity, reauthorization subject binding, rotating refresh credentials, catalog filtering, streaming request shape, interrupted and late-failure streams, missing plan scope, sign-out without billing fallback, explicit provider selection and cache isolation across accounts. UI tests cover explicit API selection, model loading/selection, sign-out messaging and failed sign-in. These fixtures validate implementation behavior, not OpenAI account eligibility or live API compatibility.
 
 ## What the integration check actually does
 
@@ -35,8 +38,10 @@ The integration script uses a disposable DB and mock provider automatically; it 
 
 For browser tests, configure a disposable migrated database with AI_PROVIDER=mock, build assets, install Chromium with `npx playwright install chromium`, and run `npm run test:e2e`. Browser tests currently create sample documents and change settings. Do not point them at valuable data. An optional `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` can select an already-installed test browser.
 
-## Release decision
+## Verification limits
 
-Status: **Partially Completed** against the full production-oriented brief. The core local workflow is implemented and passes the automated checks above. Full browser/visual, real-provider and MySQL acceptance remain outstanding, so no release-ready claim or Git tag has been made. VERSION remains the requested initial 0.1.0; no version increment was made for these verification limits.
+The v0.2 local implementation is complete for the requested dual-connection scope and is packaged for user testing. A live ChatGPT authorization, eligible subscription inference, live API-key inference, MySQL and rendered browser/mobile acceptance remain unverified. No Git tag or production-ready claim is made. Official integration availability, account permissions and model support can vary.
 
-Other limitations: local computer only; no authentication/remote phone access; 12,000-character analysis cap; single-paragraph rewrites; no incremental analysis, offline recovery, extensions or keyboard/desktop clients; heuristic score; no guarantee AI finds every mistake.
+For live acceptance, run on http://127.0.0.1, connect an eligible account, load/select a model and analyze a short non-sensitive sentence. Verify reconnect and sign-out in ChatGPT Settings. Test API-key mode separately only when you intend separately billed usage. Do not infer live success from the fake-HTTP suite.
+
+The app remains local-only; no remote login/phone access, incremental analysis or offline recovery was added. Existing text-size and single-paragraph rewrite limits remain.

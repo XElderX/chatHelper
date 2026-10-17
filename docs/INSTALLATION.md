@@ -37,7 +37,7 @@ Use the same host and password in `.env`. The application must not use the MySQL
 ## 3. Project
 
 ```bash
-unzip chatHelper-0.1.0.zip
+unzip chatHelper-0.2.0.zip
 cd chatHelper
 composer install
 cp .env.example .env
@@ -57,6 +57,8 @@ AI_PROVIDER=openai
 OPENAI_API_KEY="your-own-key"
 OPENAI_MODEL=gpt-4.1-mini
 ```
+
+For subscription usage, leave `OPENAI_API_KEY` blank, open Settings after setup, and choose **Continue with ChatGPT**. Use the `http://127.0.0.1` address, authorize plan usage, then load and select an available model. No OAuth client secret is required for this local source-distributed app.
 
 Alternatively set `AI_PROVIDER=mock` for offline demonstration. A missing real key produces a useful configuration error, never a fake success.
 
@@ -111,3 +113,7 @@ For browser integration tests, use a disposable database, set `AI_PROVIDER=mock`
 - Port in use: use another loopback port and update `APP_URL`.
 
 Detailed diagnostics: [Troubleshooting](TROUBLESHOOTING.md).
+
+## Upgrade an existing installation
+
+See [Upgrade to 0.2](UPGRADE_0.2.md). Do not overwrite `.env`, regenerate APP_KEY, or run migrate:fresh on an existing workspace.

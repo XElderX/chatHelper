@@ -4,6 +4,8 @@ Install according to INSTALLATION.md. Run `composer dev` for local Laravel + Vit
 
 ## Layout
 
+- `app/Services/Connections`: official ChatGPT OAuth, identity verification and connection selection.
+- `resources/js/ConnectionSettings.vue`: explicit billing, account and model controls.
 - `app/Services/AI`: provider abstraction, prompts, output validation, analysis/rewrite services.
 - `app/Http/Requests`: API input contracts.
 - `app/Http/Controllers`: thin HTTP adapters and CRUD.
@@ -45,3 +47,5 @@ No live API key is necessary for automated tests. A live smoke test should be de
 ## Contribution / release workflow
 
 Read AGENTS.md. Keep commits scoped. Write regression tests for state/range/persistence changes. Update CHANGELOG, API and user docs as needed. Run required gates, document exact results and limitations. Update VERSION only for a prepared release. Do not tag an unverified release; see VERSIONING.md.
+
+OAuth tests generate an RSA test key, sign fixtures, fake provider HTTP and validate real signature/claim handling. Never bypass signature verification in production. Stream fixtures must be freshly created for each fake HTTP call because consuming a stream closes it. The provider integration is local/OSS only; keep loopback, session and CSRF protections. No API fallback is permitted for subscription errors.

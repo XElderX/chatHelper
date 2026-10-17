@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\WritingController;
@@ -17,4 +18,14 @@ Route::prefix('api')->middleware('throttle:local-api')->group(function () {
         Route::post('writing/explain', [WritingController::class, 'explain']);
     });
     Route::apiResource('documents', DocumentController::class);
+});
+
+Route::get('/auth/chatgpt/callback', [ConnectionController::class, 'callback'])->middleware('throttle:20,1');
+Route::prefix('api/connections')->middleware('throttle:30,1')->group(function () {
+    Route::get('/', [ConnectionController::class, 'show']);
+    Route::put('/', [ConnectionController::class, 'select']);
+    Route::post('chatgpt/start', [ConnectionController::class, 'start']);
+    Route::get('chatgpt/models', [ConnectionController::class, 'models']);
+    Route::put('chatgpt/model', [ConnectionController::class, 'model']);
+    Route::post('chatgpt/disconnect', [ConnectionController::class, 'disconnect']);
 });
