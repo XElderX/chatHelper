@@ -40,7 +40,7 @@ PUT example:
 ```
 GET/PUT response example (timestamps omitted):
 ```json
-{"settings":{"id":1,"mode":"natural","live_analysis":false,"dark_mode":true},"version":"0.1.0","provider":"openai","configured":true,"debounce_ms":700}
+{"settings":{"id":1,"mode":"natural","live_analysis":false,"dark_mode":true},"version":"0.2.0","provider":"openai","configured":true,"debounce_ms":700}
 ```
 `configured` checks presence, not key validity. No secret is returned.
 
@@ -104,3 +104,22 @@ List response is Laravel's paginator object: `data` contains `{id,title,version,
 ```
 
 Validation: 422 with per-field errors. Unknown document: 404. Stale document: 409. Non-local/cross-origin: 403. CSRF/session expiry: 419. Rate limit or upstream quota: 429. Missing/rejected credentials: 503. Provider timeout/network failure: 504. Upstream failure, incomplete response, invalid JSON/schema: 502. Provider refusal: 422 with message only. Provider bodies/secrets are not relayed. Never retry automatically with an unknown document version.
+
+## AI connections (v0.2)
+
+These routes use the same local-only/session/CSRF protections and an additional 30 requests/minute connection limit.
+
+| Method | Path | Contract |
+|---|---|---|
+| GET | `/connections` | provider, configured, api_key_configured, accounts, active_account_id |
+| PUT | `/connections` | `{provider: openai/chatgpt/mock, account_id?: integer}`; explicit selection |
+| POST | `/connections/chatgpt/start` | Optional account_id for reauthorization; returns `{url}` for full-page navigation to official OpenAI authorization |
+| GET | `/connections/chatgpt/models?account_id=1` | Returns `{models:[{id,label}]}` from the authorized account's catalog |
+| PUT | `/connections/chatgpt/model` | `{account_id,model}`; checks the current catalog and saves selection |
+| POST | `/connections/chatgpt/disconnect` | `{account_id}`; returns revocation_confirmed and a safe status message |
+
+`GET /auth/chatgpt/callback` is outside the /api prefix, limited to 20/minute. It validates single-use state, browser session, PKCE exchange and signed identity, then redirects to `/?connection=return`. A notice is available once from writing/settings. Do not call this route manually. Only HTTP 127.0.0.1 callbacks are generated, with the running app's port.
+
+Account metadata includes id, label, issued client_id, connected, plan_authorized and selected model. It never includes access/refresh/ID tokens or the identity subject. `configured` means local connection prerequisites exist, not that live service access has been verified. No raw API key is accepted by these routes.
+
+Subscription failures: 401 reconnect needed; 403 missing permission; 422 invalid selection/sign-in; 409 concurrent connection change; 429 plan usage unavailable/limited; 502 malformed/incomplete stream; 503 sign-in/model service unavailable; 504 timeout/interruption. Error bodies contain a safe message. No automatic retry or billing fallback occurs.

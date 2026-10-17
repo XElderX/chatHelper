@@ -11,7 +11,7 @@ class LocalOnly
     {
         // No trusted proxy configuration: inspect actual peer, not forwarded headers.
         abort_unless(in_array($request->server('REMOTE_ADDR'), ['127.0.0.1', '::1'], true)
-            && in_array($request->getHost(), ['127.0.0.1', 'localhost', '[::1]'], true), 403, 'chatHelper v0.1 is restricted to this computer.');
+            && in_array($request->getHost(), ['127.0.0.1', 'localhost', '[::1]'], true), 403, 'chatHelper is restricted to this computer.');
         if ($origin = $request->header('Origin')) {
             abort_unless($origin === $request->getSchemeAndHttpHost(), 403, 'Cross-origin requests are not allowed.');
         }

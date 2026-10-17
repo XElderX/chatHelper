@@ -48,3 +48,13 @@ Whole-document analysis is bounded, debounced and cached for five minutes. Parag
 Document DB content is local and unencrypted. Cached suggestions are encrypted with APP_KEY. Hashes are used for cache keys. Provider request data is not intentionally logged; expected provider errors are excluded from exception reporting. API keys stay server-side. All UI data is escaped by Vue. Native deletion confirmation is the only destructive action prompt.
 
 Future browser/keyboard/desktop clients can reuse the provider and validation services, but need an authenticated external transport and ownership model first.
+
+## v0.2 connection architecture
+
+`ConnectionManager` resolves persisted provider selection with AI_PROVIDER as the initial fallback. `ChatGptAuth` manages registration, authorization-code exchange with PKCE S256, signed identity checks, refresh-token rotation and revocation. `OpenAiIdentity` validates fixed-origin discovery and JWKS and uses firebase/php-jwt for RS256 verification. State is single-use, session-bound and encrypted in a ten-minute server cache entry. Nonce, issuer, audience, expiration and subject binding are checked. Credential mutations are serialized with a persistent cache lock.
+
+New `chatgpt_accounts` stores issued client_id, subject, label, encrypted credential JSON, auth_epoch and model. `writing_settings` adds provider, chatgpt_account_id and stable host_id. Credentials use APP_KEY encryption. Reauthorization retains client/account binding; sign-out clears credentials and model while keeping the registration. Distinct registrations remain separate even when email labels match. These provider identities do not grant remote access to the application.
+
+`ChatGptProvider` reads the account's authorized model catalog and calls the official Responses endpoint with subscription bearer credentials, array input, store:false and stream:true. API-only controls are omitted. `ResponseDecoder` consumes bounded SSE, accepting only completed responses; partial content and late failures never become edits. The subscription provider never reads the API key. Requests are not retried through another provider.
+
+Analysis caches include provider, account, authorization epoch and model; credential eligibility is checked before serving cached subscription results. Connections changed during in-flight work cause stale results to be rejected. `ConnectionSettings.vue` exposes explicit billing choice, account selection, sign-out and model choice. Changing connection invalidates editor suggestions and rewrite previews. Existing document/editor behavior is preserved.

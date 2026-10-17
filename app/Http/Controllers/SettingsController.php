@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\WritingSetting;
+use App\Services\Connections\ConnectionManager;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +16,9 @@ class SettingsController extends Controller
 
     public function show()
     {
-        return ['settings' => $this->settings(), 'version' => config('writing.version'), 'provider' => config('writing.provider'), 'configured' => config('writing.provider') === 'mock' || (bool) config('writing.key'), 'debounce_ms' => config('writing.debounce')];
+        $connection = app(ConnectionManager::class)->status();
+
+        return ['settings' => $this->settings()->only(['id', 'mode', 'live_analysis', 'dark_mode']), 'version' => config('writing.version'), ...$connection, 'debounce_ms' => config('writing.debounce'), 'connection_notice' => request()->hasSession() ? request()->session()->pull('connection_notice') : null];
     }
 
     public function update(Request $r)

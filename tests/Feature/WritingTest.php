@@ -172,7 +172,7 @@ class WritingTest extends TestCase
     public function test_rate_limiting(): void
     {
         config(['writing.rate_limit' => 1]);
-        $this->postJson('/api/writing/analyze',$this->payload())->assertOk();
-        $this->postJson('/api/writing/analyze',$this->payload())->assertStatus(429);
+        $this->postJson('/api/writing/analyze', $this->payload())->assertOk();
+        $this->postJson('/api/writing/analyze', $this->payload())->assertStatus(429);
     }
 }
